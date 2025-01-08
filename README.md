@@ -1,4 +1,6 @@
+nano README.md
 <<<<<<< HEAD
+exit
 # Fullstack_Python
 Proyecto Final PA 3 Cuatrimestre
 =======
