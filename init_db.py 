@@ -1,0 +1,6 @@
+from app import db, app
+
+# Inicializar la base de datos
+with app.app_context():
+    db.create_all()
+    print("Base de datos inicializada correctamente.")

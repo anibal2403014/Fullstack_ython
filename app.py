@@ -1,68 +1,109 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, request, session, redirect, url_for, render_template, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from functools import wraps
+import bcrypt
+import os
 
+# Configuración de la aplicación Flask
 app = Flask(__name__)
-app.secret_key = "TU_LLAVE_SECRETA"  # Cambia esto por algo seguro en producción
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/usuarios.db'
+app.config['SECRET_KEY'] = 'mi_secreto'
+db = SQLAlchemy(app)
 
-@app.route("/")
-def index():
-    # Verificamos si el usuario está en sesión
-    if "username" in session:
-        return f"<h1>Bienvenido(a) {session['username']}!</h1><p>Estás en la página de inicio con sesión iniciada.</p>"
-    else:
-        return "<h1>Página de inicio (landing page)</h1><p>Usuario no autenticado.</p>"
+# Crear la base de datos si no existe
+db_path = "instance/usuarios.db"
+if not os.path.exists(db_path):
+    with app.app_context():
+        db.create_all()
+        print("Base de datos creada correctamente.")
+else:
+    print("La base de datos ya existe.")
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        # Aquí recibimos datos de un formulario
-        username = request.form.get("username")
-        password = request.form.get("password")
-        # Validación sencilla (HARDCODE - para ejemplo)
-        if username == "admin" and password == "1234":
-            session["username"] = username
-            return redirect(url_for("index"))
-        else:
-            return "<p>Credenciales inválidas. <a href='/login'>Intenta de nuevo</a></p>"
-    return '''
-    <h1>Inicio de Sesión</h1>
-    <form method="POST">
-        <label>Usuario:</label>
-        <input type="text" name="username">
-        <br><br>
-        <label>Contraseña:</label>
-        <input type="password" name="password">
-        <br><br>
-        <button type="submit">Iniciar sesión</button>
-    </form>
-    '''
+# Modelo de la base de datos
+class Usuario(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(80), unique=True, nullable=False)
+    contrasena = db.Column(db.String(120), nullable=False)
 
-@app.route("/logout")
-def logout():
-    session.pop("username", None)
-    return redirect(url_for("index"))
+# Decorador para proteger rutas
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'usuario' not in session:
+            return jsonify({"error": "Acceso denegado. Por favor, inicia sesión."}), 403
+        return f(*args, **kwargs)
+    return decorated_function
 
-@app.route("/registro", methods=["GET", "POST"])
+# Ruta de Registro (Con cifrado de contraseña)
+@app.route('/registro', methods=['GET', 'POST'])
 def registro():
-    if request.method == "POST":
-        # Recibir datos del formulario
-        nuevo_usuario = request.form.get("nuevo_usuario")
-        nuevo_password = request.form.get("nuevo_password")
-        # Lógica de guardado en BD (simulada aquí)
-        # ...
-        return f"<p>Usuario '{nuevo_usuario}' registrado (simulado). <a href='/login'>Ir a login</a></p>"
-    return '''
-    <h1>Registro de Usuario</h1>
-    <form method="POST">
-        <label>Nuevo usuario:</label>
-        <input type="text" name="nuevo_usuario">
-        <br><br>
-        <label>Contraseña:</label>
-        <input type="password" name="nuevo_password">
-        <br><br>
-        <button type="submit">Registrarme</button>
-    </form>
-    '''
+    try:
+        if request.method == 'POST':
+            nombre = request.form['nombre']
+            contrasena = request.form['contrasena']
 
-if __name__ == "__main__":
-    app.run(debug=True, port=5050)
+            # Verificar si el usuario ya existe
+            usuario_existente = Usuario.query.filter_by(nombre=nombre).first()
+            if usuario_existente:
+                return jsonify({"error": f"El usuario {nombre} ya está registrado. Intenta con otro nombre."}), 400
 
+            # Cifrar la contraseña antes de guardarla
+            contrasena_cifrada = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
+
+            # Guardar en la base de datos
+            nuevo_usuario = Usuario(nombre=nombre, contrasena=contrasena_cifrada.decode('utf-8'))
+            db.session.add(nuevo_usuario)
+            db.session.commit()
+
+            return jsonify({"mensaje": f"Usuario {nombre} registrado con éxito."}), 201
+
+        return render_template('registro.html')
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Ruta de Login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        contrasena = request.form['contrasena']
+
+        # Verificar si el usuario existe en la base de datos
+        usuario = Usuario.query.filter_by(nombre=nombre).first()
+
+        if usuario and bcrypt.checkpw(contrasena.encode('utf-8'), usuario.contrasena.encode('utf-8')):
+            session['usuario'] = usuario.nombre
+            return jsonify({"mensaje": f"Bienvenido {usuario.nombre}!"}), 200
+        else:
+            session.pop('usuario', None)  # Limpiar la sesión si las credenciales son incorrectas
+            return jsonify({"error": "Nombre de usuario o contraseña incorrectos"}), 401
+
+    return render_template('login.html')
+
+# Ruta de Logout
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    session.pop('usuario', None)
+    return jsonify({"mensaje": "Has cerrado sesión correctamente."}), 200
+
+# Ruta para listar usuarios registrados
+@app.route('/usuarios', methods=['GET'])
+def listar_usuarios():
+    usuarios = Usuario.query.all()
+    lista_usuarios = [{"id": u.id, "nombre": u.nombre} for u in usuarios]
+    return jsonify(lista_usuarios)
+
+# Ruta protegida (Dashboard)
+@app.route('/dashboard', methods=['GET', 'POST'])
+@login_required
+def dashboard():
+    usuario_en_sesion = Usuario.query.filter_by(nombre=session.get('usuario')).first()
+    if not usuario_en_sesion:
+        session.pop('usuario', None)
+        return jsonify({"error": "Usuario no encontrado o sesión inválida."}), 403
+    return jsonify({"mensaje": f"Bienvenido al dashboard, {session['usuario']}!"})
+
+# Ejecutar la aplicación
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
