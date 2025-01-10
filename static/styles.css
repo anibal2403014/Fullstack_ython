@@ -1,0 +1,223 @@
+/* Estilos generales */
+body {
+    background: url("../static/background.jpg") no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+/* Estilos específicos para el dashboard */
+body.dashboard-page {
+    background: url("../static/background2.jpg") no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Contenedor principal */
+.container {
+    background-color: rgba(26, 26, 26, 0.9);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Título principal */
+.logo-text {
+    font-size: 42px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #e50914;
+}
+
+/* Títulos secundarios */
+h1 {
+    font-size: 28px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+/* Caja de formularios */
+.form-box {
+    background-color: #000000;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Grupos de formularios */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+/* Etiquetas de los formularios */
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+/* Campos de entrada */
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+/* Placeholder en blanco */
+.form-group input::placeholder {
+    color: #ffffff;
+}
+
+/* Botones */
+.button {
+    background-color: #e50914;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #b20710;
+}
+
+/* Enlace de registro */
+.registro-link {
+    color: yellow;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.registro-link:hover {
+    color: #FFD700;
+    text-decoration: underline;
+}
+
+/* Mensajes flash */
+.flash-messages {
+    margin: 20px auto;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Estilo de los mensajes de alerta */
+.alert {
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Mensaje de error */
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Mensaje de éxito */
+.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* Caja del título "Popcorn Hour" */
+.header-box {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Estilo del texto "Popcorn Hour" */
+.header-box h1 {
+    color: #e50914;
+    font-size: 42px;
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+}
+
+/* Ajustes de formularios */
+input {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+/* Ajustes específicos para el dashboard */
+.dashboard-container {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-container h1 {
+    color: #e50914;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.dashboard-container p {
+    font-size: 18px;
+    color: white;
+}
+
+.dashboard-container .button {
+    background-color: #e50914;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    border-radius: 5px;
+}
+
+.dashboard-container .button:hover {
+    background-color: #b20710;
+}
+
+/* Nuevo estilo para mensajes al cerrar sesión */
+.flash-message.logout {
+    background-color: #ffcccc;
+    color: #990000;
+    font-weight: bold;
+    border: 1px solid #ff0000;
+}
